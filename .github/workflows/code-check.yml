@@ -1,14 +1,24 @@
 name: Code & Security Check
 
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      php:
+        type: boolean
+        default: true
+        description: "Run PHP syntax check"
+      secrets:
+        type: boolean
+        default: true
+        description: "Run secret detection with Gitleaks"
+      js:
+        type: boolean
+        default: true
+        description: "Run JavaScript quality check"
 
 jobs:
   php-lint:
+    if: ${{ inputs.php }}
     name: PHP Syntax Check
     runs-on: ubuntu-latest
     steps:
@@ -18,6 +28,7 @@ jobs:
           find . -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors" || true
 
   secret-scan:
+    if: ${{ inputs.secrets }}
     name: Secret Detection
     runs-on: ubuntu-latest
     steps:
@@ -28,6 +39,7 @@ jobs:
           config-path: .github/gitleaks.toml
 
   js-check:
+    if: ${{ inputs.js }}
     name: JavaScript Quality
     runs-on: ubuntu-latest
     steps:
