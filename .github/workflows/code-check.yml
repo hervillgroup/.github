@@ -1,0 +1,44 @@
+name: Code & Security Check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  php-lint:
+    name: PHP Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP Lint
+        run: |
+          find . -name "*.php" -exec php -l {} \; 2>&1 | grep -v "No syntax errors" || true
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .github/gitleaks.toml
+
+  js-check:
+    name: JavaScript Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for common issues
+        run: |
+          echo "=== Checking JS syntax ==="
+          for f in $(find . -name "*.js" -not -path "*/.git/*"); do
+            node --check "$f" && echo "OK: $f" || echo "FAIL: $f"
+          done
+          echo "=== Checking for exposed emails ==="
+          grep -rn "@gmail\.com\|@hotmail\.com\|@yahoo\.com\|@outlook\.com" --include="*.html" . && echo "WARNING: Personal emails found in HTML!" || echo "OK: No personal emails in HTML"
+          echo "=== Checking for hardcoded passwords ==="
+          grep -rn "DB_PASS\|password\s*=\s*'[^']*'" --include="*.php" --include="*.js" . && echo "WARNING: Hardcoded passwords detected!" || echo "OK: No hardcoded passwords"

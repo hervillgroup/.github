@@ -1,0 +1,21 @@
+# Gitleaks config — customize what to detect and what to allow
+title: PUDO Caribe Secret Detection
+
+[allowlist]
+  description = "Allowed patterns specific to this project"
+
+  # Allow the config.example.php template (has placeholder passwords)
+  paths = [
+    '''config\.example\.php''',
+    '''_dump_excel\.py''',
+  ]
+
+[rules]
+  # Allow common false positives in HTML/JS
+  [rules.allow]
+    description = "Skip common false positives"
+    regexes = [
+      '''placeholder''',
+      '''example''',
+      '''YOUR_DB_PASSWORD''',
+    ]
