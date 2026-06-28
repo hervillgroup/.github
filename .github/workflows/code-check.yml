@@ -10,7 +10,7 @@ on:
       secrets:
         type: boolean
         default: true
-        description: "Run secret detection with Gitleaks"
+        description: "Run secret detection"
       js:
         type: boolean
         default: true
@@ -33,10 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2
-        with:
-          config-path: .github/gitleaks.toml
 
   js-check:
     if: ${{ inputs.js }}
